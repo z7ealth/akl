@@ -5,12 +5,11 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-Restart=always
-RestartSec=1
-User=<your-user>
+User=root
+Restart=no
 ExecStart=/path/to/akl
 StandardOutput=append:/var/log/akl.log
 StandardError=append:/var/log/akl.log
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

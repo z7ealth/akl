@@ -56,8 +56,6 @@ fn get_cpu_temperature() -> f64 {
         }
     }
 
-    println!("CPU Temp: {}", cpu_temp);
-
     cpu_temp
 }
 
