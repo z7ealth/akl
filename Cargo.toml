@@ -1,0 +1,8 @@
+[package]
+name = "akl"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hidapi = "2.6.1"
+psutil = "3.3.0"
