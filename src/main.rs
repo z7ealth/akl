@@ -8,43 +8,33 @@ const PRODUCT_ID: u16 = 0x0003;
 const INTERVAL: u64 = 2;
 
 fn get_bar_value(value: f64) -> f64 {
-    return value - 1.0;
+    return value / 10.0;
 }
 
 fn get_data(value: f64, mode: &str) -> Vec<u8> {
     let mut base_data = vec![0; 64];
-    let numbers: Vec<u8> = value
-        .to_string() // Convert the integer to a string
-        .chars() // Get an iterator over the characters of the string
-        .map(|c| c as u8) // Convert each character to a digit
-        .collect();
 
-    base_data[0] = 16;
-    base_data[2] = get_bar_value(value) as u8;
+    let numbers: Vec<char> = value
+        .to_string() // Convert the integer to a string
+        .chars()
+        .collect(); // Get an iterator over the characters of the string
+
+    base_data[0] = 16; // ?
 
     match mode {
         "start" => base_data[1] = 170,
         "util" => base_data[1] = 76,
-        _ => base_data[1] = 19,
+        _ => base_data[1] = 19, // CPU Temp mode
     }
 
-    match numbers.len() {
-        0 | 1 => base_data[5] = numbers[0],
-        2 => {
-            base_data[4] = numbers[0];
-            base_data[5] = numbers[1];
-        }
-        3 => {
-            base_data[3] = numbers[0];
-            base_data[4] = numbers[1];
-            base_data[5] = numbers[2];
-        }
-        _ => {
-            base_data[3] = numbers[0];
-            base_data[4] = numbers[1];
-            base_data[5] = numbers[2];
-            base_data[6] = numbers[3];
-        }
+    base_data[2] = get_bar_value(value) as u8; // Bar
+
+    if value >= 10.0 && value < 100.0 {
+        base_data[3] = 0; // Tens digit
+        base_data[4] = numbers[0].to_digit(10).unwrap() as u8; // Tens digit
+        base_data[5] = numbers[1].to_digit(10).unwrap() as u8; // Ones digit
+    } else {
+        eprintln!("Unusual temp: {}", value);
     }
 
     return base_data;
@@ -77,8 +67,6 @@ fn get_temp() -> Vec<u8> {
 }
 
 fn main() {
-    println!("Printing all available hid devices:");
-
     match HidApi::new() {
         Ok(api) => {
             let ak = api.open(VENDOR_ID, PRODUCT_ID).unwrap();
@@ -89,10 +77,11 @@ fn main() {
             );
 
             ak.set_blocking_mode(false).unwrap();
-            ak.write(&get_data(0.0, "start")).unwrap();
+            ak.write(&get_data(get_cpu_temperature(), "start")).unwrap();
 
             loop {
                 ak.set_blocking_mode(false).unwrap();
+
                 ak.write(&get_temp()).unwrap();
                 sleep(Duration::from_secs(INTERVAL));
             }
