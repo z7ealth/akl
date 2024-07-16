@@ -7,7 +7,7 @@ StartLimitIntervalSec=0
 Type=simple
 User=root
 Restart=no
-ExecStart=/path/to/akl
+ExecStart=/home/<your-user>/.cargo/bin/akl
 StandardOutput=append:/var/log/akl.log
 StandardError=append:/var/log/akl.log
 
