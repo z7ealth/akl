@@ -1,0 +1,16 @@
+[Unit]
+Description=DeepCool AK500 Digital linux driver service.
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=<your-user>
+ExecStart=/path/to/akl
+StandardOutput=append:/var/log/akl.log
+StandardError=append:/var/log/akl.log
+
+[Install]
+WantedBy=multi-user.target
