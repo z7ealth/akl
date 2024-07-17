@@ -6,3 +6,6 @@ edition = "2021"
 [dependencies]
 hidapi = "2.6.1"
 psutil = "3.3.0"
+tray-icon = "0.14.3"
+image = "0.25.1"
+gtk = "0.18.1"
