@@ -1,3 +1,5 @@
+use std::{thread, time::Duration};
+
 use tray_icon::TrayIconBuilder;
 //use tray_icon::menu::Menu;
 
@@ -6,20 +8,35 @@ pub fn start() {
         env!("CARGO_MANIFEST_DIR"),
         "/assets/images/deep_cool_icon.png"
     );
-    let icon = load_icon(std::path::Path::new(path));
 
     std::thread::spawn(|| {
-        gtk::init().unwrap();
-        
-        let _tray_icon = TrayIconBuilder::new()
-            .with_tooltip("DeepCool AK Digital for Linux")
-            .with_icon(icon)
-            .with_title("DeepCool AK Digital")
-            //.with_menu(Box::new(Menu::new()))
-            .build()
-            .unwrap();
+        loop {
+            let icon = load_icon(std::path::Path::new(path));
 
-        gtk::main();
+            if !gtk::is_initialized() || !gtk::is_initialized_main_thread() {
+
+                println!("GTK not initialized");
+
+                match gtk::init() {
+                    Ok(_) => {
+                        println!("GTK Initialized");
+                        let _tray_icon = TrayIconBuilder::new()
+                            .with_tooltip("DeepCool AK Digital for Linux")
+                            .with_icon(icon)
+                            .with_title("DeepCool AK Digital")
+                            //.with_menu(Box::new(Menu::new()))
+                            .build()
+                            .unwrap();
+
+                        gtk::main();
+                    }
+                    Err(_) => {
+                        println!("Waiting for GTK to initialize");
+                    }
+                }
+            }
+            thread::sleep(Duration::from_secs(5));
+        }
     });
 }
 

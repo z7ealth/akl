@@ -1,15 +1,17 @@
 [Unit]
 Description=DeepCool AK500 Digital linux driver service.
-After=network.target
-StartLimitIntervalSec=0
+After=graphical.target
 
 [Service]
 Type=simple
 User=root
-Restart=no
-ExecStart=/home/<your-user>/.cargo/bin/akl
+Restart=on-failure
+RestartSec=5s
+ExecStart=/home/<user>/.cargo/bin/akl
 StandardOutput=append:/var/log/akl.log
 StandardError=append:/var/log/akl.log
+Environment=DISPLAY=:1
+Environment=XAUTHORITY=/run/user/1000/gdm/Xauthority
 
 [Install]
 WantedBy=default.target
