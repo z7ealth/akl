@@ -64,7 +64,7 @@ fn get_temp() -> Vec<u8> {
     get_data(temp, "temp")
 }
 
-pub fn start() {
+pub async fn start() {
     match HidApi::new() {
         Ok(api) => {
             let ak = api.open(VENDOR_ID, PRODUCT_ID).unwrap();

@@ -3,41 +3,35 @@ use std::{thread, time::Duration};
 use tray_icon::TrayIconBuilder;
 //use tray_icon::menu::Menu;
 
-pub fn start() {
-    let path = concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/assets/images/deep_cool_icon.png"
-    );
+pub async fn start() {
+    loop {
+        match gtk::init() {
+            Ok(_) => {
+                println!("GTK Initialized");
 
-    std::thread::spawn(|| {
-        loop {
-            let icon = load_icon(std::path::Path::new(path));
+                let path = concat!(
+                    env!("CARGO_MANIFEST_DIR"),
+                    "/assets/images/deep_cool_icon.png"
+                );
+                let icon: tray_icon::Icon = load_icon(std::path::Path::new(path));
 
-            if !gtk::is_initialized() || !gtk::is_initialized_main_thread() {
+                let _tray_icon = TrayIconBuilder::new()
+                    .with_tooltip("DeepCool AK Digital for Linux")
+                    .with_icon(icon)
+                    .with_title("DeepCool AK Digital")  
+                    //.with_menu(Box::new(Menu::new()))
+                    .build()
+                    .unwrap();
 
-                println!("GTK not initialized");
-
-                match gtk::init() {
-                    Ok(_) => {
-                        println!("GTK Initialized");
-                        let _tray_icon = TrayIconBuilder::new()
-                            .with_tooltip("DeepCool AK Digital for Linux")
-                            .with_icon(icon)
-                            .with_title("DeepCool AK Digital")
-                            //.with_menu(Box::new(Menu::new()))
-                            .build()
-                            .unwrap();
-
-                        gtk::main();
-                    }
-                    Err(_) => {
-                        println!("Waiting for GTK to initialize");
-                    }
-                }
+                gtk::main();
+                break;
             }
-            thread::sleep(Duration::from_secs(5));
+            Err(_) => {
+                println!("Waiting for GTK to initialize");
+                thread::sleep(Duration::from_secs(5));
+            }
         }
-    });
+    }
 }
 
 fn load_icon(path: &std::path::Path) -> tray_icon::Icon {
