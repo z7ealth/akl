@@ -1,7 +1,7 @@
 use std::{thread, time::Duration};
 
+use tray_icon::menu::{Menu, MenuId, MenuItemBuilder, SubmenuBuilder};
 use tray_icon::TrayIconBuilder;
-//use tray_icon::menu::Menu;
 
 pub async fn start() {
     loop {
@@ -18,8 +18,8 @@ pub async fn start() {
                 let _tray_icon = TrayIconBuilder::new()
                     .with_tooltip("DeepCool AK Digital for Linux")
                     .with_icon(icon)
-                    .with_title("DeepCool AK Digital")  
-                    //.with_menu(Box::new(Menu::new()))
+                    .with_title("DeepCool AK Digital")
+                    .with_menu(Box::new(build_menu()))
                     .build()
                     .unwrap();
 
@@ -32,6 +32,28 @@ pub async fn start() {
             }
         }
     }
+}
+
+fn build_menu() -> Menu {
+    let menu = Menu::new();
+
+    let device_info = MenuItemBuilder::new()
+        .id(MenuId::new("device_info"))
+        .text("AK500 Digital")
+        .enabled(true)
+        .build();
+
+    let device_submenu = SubmenuBuilder::new()
+        .id(MenuId::new("device_submenu"))
+        .text("Device")
+        .enabled(true)
+        .items(&[&device_info])
+        .build()
+        .unwrap();
+
+    menu.append_items(&[&device_submenu]).unwrap();
+
+    menu
 }
 
 fn load_icon(path: &std::path::Path) -> tray_icon::Icon {
