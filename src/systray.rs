@@ -11,7 +11,7 @@ pub async fn start() {
 
                 let path = concat!(
                     env!("CARGO_MANIFEST_DIR"),
-                    "/assets/images/deep_cool_icon.png"
+                    "/assets/images/deepcool.ico"
                 );
                 let icon: tray_icon::Icon = load_icon(std::path::Path::new(path));
 
