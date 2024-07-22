@@ -1,6 +1,6 @@
 use std::{thread, time::Duration};
 
-use tray_icon::menu::{Menu, MenuId, MenuItemBuilder, SubmenuBuilder};
+use tray_icon::menu::{Menu, MenuId, CheckMenuItem, SubmenuBuilder};
 use tray_icon::TrayIconBuilder;
 
 pub async fn start() {
@@ -37,19 +37,16 @@ pub async fn start() {
 fn build_menu() -> Menu {
     let menu = Menu::new();
 
-    let device_info = MenuItemBuilder::new()
-        .id(MenuId::new("device_info"))
-        .text("AK500 Digital")
-        .enabled(true)
-        .build();
+    let device_info = CheckMenuItem::new("AK500 Digital", false, true, None);
 
     let device_submenu = SubmenuBuilder::new()
         .id(MenuId::new("device_submenu"))
         .text("Device")
         .enabled(true)
-        .items(&[&device_info])
         .build()
         .unwrap();
+
+    device_submenu.append(&device_info).unwrap();
 
     menu.append_items(&[&device_submenu]).unwrap();
 
