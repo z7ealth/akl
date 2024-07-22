@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 hidapi = "2.6.1"
 psutil = "3.3.0"
-tray-icon = "0.14.3"
+libappindicator = "0.9.0"
 image = "0.25.1"
 gtk = "0.18.1"
 tokio = { version = "1", features = ["full"] }

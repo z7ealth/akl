@@ -1,7 +1,8 @@
+use std::path::Path;
 use std::{thread, time::Duration};
-
-use tray_icon::menu::{Menu, MenuId, CheckMenuItem, SubmenuBuilder};
-use tray_icon::TrayIconBuilder;
+use gtk::prelude::{GtkMenuItemExt, MenuShellExt, WidgetExt};
+use gtk::{Menu, MenuItem, RadioMenuItem};
+use libappindicator::{AppIndicator, AppIndicatorStatus};
 
 pub async fn start() {
     loop {
@@ -9,20 +10,18 @@ pub async fn start() {
             Ok(_) => {
                 println!("GTK Initialized");
 
-                let path = concat!(
-                    env!("CARGO_MANIFEST_DIR"),
-                    "/assets/images/deepcool.ico"
-                );
-                let icon: tray_icon::Icon = load_icon(std::path::Path::new(path));
+                let mut indicator = AppIndicator::new("libappindicator test application", "");
+                indicator.set_status(AppIndicatorStatus::Active);
 
-                let _tray_icon = TrayIconBuilder::new()
-                    .with_tooltip("DeepCool AK Digital for Linux")
-                    .with_icon(icon)
-                    .with_title("DeepCool AK Digital")
-                    .with_menu(Box::new(build_menu()))
-                    .build()
-                    .unwrap();
+                let icon_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/images");
+                indicator.set_icon_theme_path(icon_path.to_str().unwrap());
+                indicator.set_icon_full("deepcool", "icon");
 
+                let mut menu = build_menu();
+                
+                indicator.set_menu(&mut menu);
+                menu.show_all();
+                
                 gtk::main();
                 break;
             }
@@ -37,30 +36,39 @@ pub async fn start() {
 fn build_menu() -> Menu {
     let menu = Menu::new();
 
-    let device_info = CheckMenuItem::new("AK500 Digital", false, true, None);
+    let device_item = get_device_item();
+    let display_item = get_display_switch_item();
 
-    let device_submenu = SubmenuBuilder::new()
-        .id(MenuId::new("device_submenu"))
-        .text("Device")
-        .enabled(true)
-        .build()
-        .unwrap();
-
-    device_submenu.append(&device_info).unwrap();
-
-    menu.append_items(&[&device_submenu]).unwrap();
+    menu.append(&device_item);
+    menu.append(&display_item);
 
     menu
 }
 
-fn load_icon(path: &std::path::Path) -> tray_icon::Icon {
-    let (icon_rgba, icon_width, icon_height) = {
-        let image = image::open(path)
-            .expect("Failed to open icon path")
-            .into_rgba8();
-        let (width, height) = image.dimensions();
-        let rgba = image.into_raw();
-        (rgba, width, height)
-    };
-    tray_icon::Icon::from_rgba(icon_rgba, icon_width, icon_height).expect("Failed to open icon")
+fn get_device_item() -> MenuItem {
+
+    let device_radio_button = RadioMenuItem::with_label("AK500 Digital");
+
+    let device_submenu = Menu::new();
+    device_submenu.append(&device_radio_button);
+
+    let device_menu_item = MenuItem::with_label("Device");
+    device_menu_item.set_submenu(Some(&device_submenu));
+
+    device_menu_item
+}
+
+fn get_display_switch_item() -> MenuItem {
+
+    let temperature_radio_button = RadioMenuItem::with_label("Temperature");
+    let usage_radio_button = RadioMenuItem::with_label("Usage");
+
+    let display_switch_submenu = Menu::new();
+    display_switch_submenu.append(&temperature_radio_button);
+    display_switch_submenu.append(&usage_radio_button);
+
+    let display_switch_menu_item = MenuItem::with_label("Display Switch");
+    display_switch_menu_item.set_submenu(Some(&display_switch_submenu));
+
+    display_switch_menu_item
 }
