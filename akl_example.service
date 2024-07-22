@@ -7,11 +7,11 @@ Type=simple
 User=root
 Restart=on-failure
 RestartSec=5s
-ExecStart=/home/<user>/.cargo/bin/akl
+ExecStart=/usr/bin/akl
 StandardOutput=append:/var/log/akl.log
 StandardError=append:/var/log/akl.log
-Environment=DISPLAY=:1
-Environment=XAUTHORITY=/run/user/1000/gdm/Xauthority
+Environment=DISPLAY=<replace with output of echo $DISPLAY>
+Environment=XAUTHORITY=<replace with output of echo $XAUTHORITY>
 
 [Install]
 WantedBy=default.target
