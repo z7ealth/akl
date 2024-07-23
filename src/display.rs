@@ -1,17 +1,17 @@
 use std::{env, thread::sleep, time::Duration};
 
 use hidapi::HidApi;
-use psutil::{cpu::CpuPercentCollector, sensors};
+use sysinfo::{Components, System};
 
 const VENDOR_ID: u16 = 0x3633;
 const PRODUCT_ID: u16 = 0x0003;
 const INTERVAL: u64 = 2;
 
-fn get_bar_value(value: f64) -> f64 {
+fn get_bar_value(value: f32) -> f32 {
     return value / 10.0;
 }
 
-fn get_data(value: f64, mode: &str) -> Vec<u8> {
+fn get_data(value: f32, mode: &str) -> Vec<u8> {
     let mut base_data = vec![0; 64];
 
     let numbers: Vec<char> = value
@@ -40,36 +40,27 @@ fn get_data(value: f64, mode: &str) -> Vec<u8> {
     return base_data;
 }
 
-fn get_cpu_temperature() -> f64 {
-    let temperatures = sensors::temperatures();
+fn get_cpu_temperature() -> f32 {
     let mut cpu_temp = 0.0;
-    let cpu_labels = ["CPU", "Tctl"];
+    let cpu_label = "Tctl";
+    let components = Components::new_with_refreshed_list();
 
-    for temperature in temperatures {
-        match temperature {
-            Ok(sensor_temp) => {
-                if cpu_labels.contains(&sensor_temp.label().unwrap_or_default()) {
-                    cpu_temp = sensor_temp.current().celsius();
-                }
-            }
-            Err(_) => (),
+    for component in components.list() {
+        if component.label().contains(cpu_label) {
+            cpu_temp = component.temperature()
         }
     }
 
     cpu_temp
 }
 
-fn get_cpu_utilization() -> f64 {
-    let mut collector = CpuPercentCollector::new().unwrap();
-    let cpu_percents: Vec<f64> = collector
-        .cpu_percent_percpu()
-        .unwrap()
-        .into_iter()
-        .map(|cpu| cpu as f64)
-        .collect();
+fn get_cpu_utilization() -> f32 {
+    let mut system = System::new_all();
     
-    let total_usage: f64 = cpu_percents.iter().sum();
-    total_usage / cpu_percents.len() as f64
+    // First we need to update all information of our system struct.
+    system.refresh_cpu();
+    
+    system.global_cpu_info().cpu_usage()
 }
 
 fn get_temp() -> Vec<u8> {
