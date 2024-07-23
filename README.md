@@ -8,8 +8,8 @@ Based on <a href="https://github.com/raghulkrishna/deepcool-ak620-digital-linux"
 
 This project aims to provide the same functionality as DeepCool's Windows version.
 
-[!NOTE]
-As far as I know, this should work on any Linux distro.
+> [!NOTE]
+> As far as I know, this should work on any Linux distro.
 
 #### Requirements
 
