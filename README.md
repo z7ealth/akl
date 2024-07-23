@@ -21,6 +21,8 @@ This project aims to provide the same functionality as DeepCool's Windows versio
 
 `sudo dnf -y install systemd-devel libayatana-appindicator-gtk3-devel libxdo-devel`
 
+For any other distro, search for the package names and use the native package manager to install them.
+
 <hr>
 
 #### Install
