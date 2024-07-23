@@ -1,7 +1,7 @@
-use std::{thread::sleep, time::Duration};
+use std::{env, thread::sleep, time::Duration};
 
 use hidapi::HidApi;
-use psutil::sensors;
+use psutil::{cpu::CpuPercentCollector, sensors};
 
 const VENDOR_ID: u16 = 0x3633;
 const PRODUCT_ID: u16 = 0x0003;
@@ -59,9 +59,30 @@ fn get_cpu_temperature() -> f64 {
     cpu_temp
 }
 
+fn get_cpu_utilization() -> f64 {
+    let mut collector = CpuPercentCollector::new().unwrap();
+    let cpu_percents: Vec<f64> = collector
+        .cpu_percent_percpu()
+        .unwrap()
+        .into_iter()
+        .map(|cpu| cpu as f64)
+        .collect();
+    
+    let total_usage: f64 = cpu_percents.iter().sum();
+    total_usage / cpu_percents.len() as f64
+}
+
 fn get_temp() -> Vec<u8> {
     let temp = get_cpu_temperature();
     get_data(temp, "temp")
+}
+
+fn get_util() -> Vec<u8> {
+    let util = get_cpu_utilization();
+
+    println!("CPU utilization: {}", util);
+
+    get_data(util, "util")
 }
 
 pub async fn start() {
@@ -80,7 +101,15 @@ pub async fn start() {
             loop {
                 ak.set_blocking_mode(false).unwrap();
 
-                ak.write(&get_temp()).unwrap();
+                let mode = env::var("AKL_DISPLAY_MODE").unwrap_or("temp".to_string());
+
+                println!("AKL display mode: {}", mode);
+
+                match mode.as_str() {
+                    "util" => ak.write(&get_util()).unwrap(),
+                    _ => ak.write(&get_temp()).unwrap(),
+                };
+
                 sleep(Duration::from_secs(INTERVAL));
             }
         }

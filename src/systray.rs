@@ -48,11 +48,10 @@ fn build_menu() -> Menu {
 fn get_device_item() -> MenuItem {
 
     let device_radio_button = RadioMenuItem::with_label("AK500 Digital");
-
     let device_submenu = Menu::new();
-    device_submenu.append(&device_radio_button);
-
     let device_menu_item = MenuItem::with_label("Device");
+    device_radio_button.set_sensitive(false);
+    device_submenu.append(&device_radio_button);
     device_menu_item.set_submenu(Some(&device_submenu));
 
     device_menu_item
