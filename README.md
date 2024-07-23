@@ -6,7 +6,7 @@ Unofficial Linux version of DeepCool's AK Digital Software.
 
 Based on raghulkrishna/deepcool-ak620-digital-linux.
 
-This project aims to provide the same functionality as the original Windows software.
+This project aims to provide the same functionality as DeepCool's Windows version.
 
 #### Requirements
 
