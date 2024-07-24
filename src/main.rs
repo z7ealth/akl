@@ -24,6 +24,13 @@ async fn main() {
 
     // Keep the main function alive
     loop {
-        tokio::time::sleep(Duration::from_secs(1)).await;
+        tokio::time::sleep(Duration::from_secs(6)).await;
+
+        let current_mode = *mode.lock().await;
+
+        *mode.lock().await = match current_mode {
+            "temp" => "util",
+            _ => "temp"
+        };
     }
 }

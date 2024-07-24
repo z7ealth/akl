@@ -6,12 +6,7 @@ use std::path::Path;
 use std::sync::Arc;
 use std::{thread, time::Duration};
 
-pub async fn start(mode: Arc<Mutex<&str>>) {
-
-    thread::sleep(Duration::from_secs(5));
-
-    *mode.lock().await = "util";
-
+pub async fn start(_mode: Arc<Mutex<&str>>) {
     loop {
         match gtk::init() {
             Ok(_) => {
