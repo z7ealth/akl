@@ -50,7 +50,7 @@ fn get_data(value: f32, mode: &str) -> Vec<u8> {
         base_data[5] = numbers[2].to_digit(10).unwrap() as u8;
     }
 
-    return base_data;
+    base_data
 }
 
 fn get_cpu_temperature() -> f32 {
