@@ -1,7 +1,8 @@
-use std::{env, thread::sleep, time::Duration};
+use std::{sync::Arc, thread::sleep, time::Duration};
 
 use hidapi::HidApi;
 use sysinfo::{Components, System};
+use tokio::sync::Mutex;
 
 const VENDOR_ID: u16 = 0x3633;
 const PRODUCT_ID: u16 = 0x0003;
@@ -87,7 +88,7 @@ fn get_util() -> Vec<u8> {
     get_data(util, "util")
 }
 
-pub async fn start() {
+pub async fn start(mode: Arc<Mutex<&str>>) {
     match HidApi::new() {
         Ok(api) => {
             let ak = api.open(VENDOR_ID, PRODUCT_ID).unwrap();
@@ -105,9 +106,9 @@ pub async fn start() {
             loop {
                 ak.set_blocking_mode(false).unwrap();
 
-                let mode = env::var("AKL_DISPLAY_MODE").unwrap_or("temp".to_string());
+                println!("Selected mode: {:?}", *mode);
 
-                match mode.as_str() {
+                match *mode.lock().await {
                     "util" => ak.write(&get_util()).unwrap(),
                     _ => ak.write(&get_temp()).unwrap(),
                 };

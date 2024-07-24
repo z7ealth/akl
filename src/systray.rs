@@ -1,10 +1,17 @@
-use std::path::Path;
-use std::{thread, time::Duration};
 use gtk::prelude::{GtkMenuItemExt, MenuShellExt, WidgetExt};
 use gtk::{Menu, MenuItem, RadioMenuItem};
 use libappindicator::{AppIndicator, AppIndicatorStatus};
+use tokio::sync::Mutex;
+use std::path::Path;
+use std::sync::Arc;
+use std::{thread, time::Duration};
 
-pub async fn start() {
+pub async fn start(mode: Arc<Mutex<&str>>) {
+
+    thread::sleep(Duration::from_secs(5));
+
+    *mode.lock().await = "util";
+
     loop {
         match gtk::init() {
             Ok(_) => {
@@ -18,10 +25,10 @@ pub async fn start() {
                 indicator.set_icon_full("deepcool", "icon");
 
                 let mut menu = build_menu();
-                
+
                 indicator.set_menu(&mut menu);
                 menu.show_all();
-                
+
                 gtk::main();
                 break;
             }
@@ -46,7 +53,6 @@ fn build_menu() -> Menu {
 }
 
 fn get_device_item() -> MenuItem {
-
     let device_radio_button = RadioMenuItem::with_label("AK500 Digital");
     let device_submenu = Menu::new();
     let device_menu_item = MenuItem::with_label("Device");
@@ -58,7 +64,6 @@ fn get_device_item() -> MenuItem {
 }
 
 fn get_display_switch_item() -> MenuItem {
-
     let temperature_radio_button = RadioMenuItem::with_label("Temperature");
     let usage_radio_button = RadioMenuItem::with_label("Usage");
 
