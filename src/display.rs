@@ -1,12 +1,11 @@
-use std::{sync::Arc, thread::sleep, time::Duration};
+use std::{sync::{Arc, Mutex}, thread::sleep, time::Duration};
 
 use hidapi::HidApi;
 use sysinfo::{Components, System};
-use tokio::sync::Mutex;
 
 const VENDOR_ID: u16 = 0x3633;
 const PRODUCT_ID: u16 = 0x0003;
-const INTERVAL: u64 = 2;
+const INTERVAL: u64 = 1;
 
 fn get_bar_value(value: f32) -> f32 {
     
@@ -88,7 +87,7 @@ fn get_util() -> Vec<u8> {
     get_data(util, "util")
 }
 
-pub async fn start(mode: Arc<Mutex<&str>>) {
+pub fn start(mode: Arc<Mutex<String>>) {
     match HidApi::new() {
         Ok(api) => {
             let ak = api.open(VENDOR_ID, PRODUCT_ID).unwrap();
@@ -106,9 +105,7 @@ pub async fn start(mode: Arc<Mutex<&str>>) {
             loop {
                 ak.set_blocking_mode(false).unwrap();
 
-                println!("Selected mode: {:?}", *mode);
-
-                match *mode.lock().await {
+                match mode.lock().unwrap().as_str() {
                     "util" => ak.write(&get_util()).unwrap(),
                     _ => ak.write(&get_temp()).unwrap(),
                 };

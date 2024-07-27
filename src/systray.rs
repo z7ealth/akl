@@ -1,12 +1,11 @@
-use gtk::prelude::{GtkMenuItemExt, MenuShellExt, WidgetExt};
+use gtk::prelude::{CheckMenuItemExt, GtkMenuItemExt, MenuShellExt, RadioMenuItemExt, WidgetExt};
 use gtk::{Menu, MenuItem, RadioMenuItem};
 use libappindicator::{AppIndicator, AppIndicatorStatus};
-use tokio::sync::Mutex;
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::{thread, time::Duration};
 
-pub async fn start(_mode: Arc<Mutex<&str>>) {
+pub fn start(mode: Arc<Mutex<String>>) {
     loop {
         match gtk::init() {
             Ok(_) => {
@@ -19,9 +18,10 @@ pub async fn start(_mode: Arc<Mutex<&str>>) {
                 indicator.set_icon_theme_path(icon_path.to_str().unwrap());
                 indicator.set_icon_full("deepcool", "icon");
 
-                let mut menu = build_menu();
+                let mut menu = build_menu(mode);
 
                 indicator.set_menu(&mut menu);
+
                 menu.show_all();
 
                 gtk::main();
@@ -35,11 +35,11 @@ pub async fn start(_mode: Arc<Mutex<&str>>) {
     }
 }
 
-fn build_menu() -> Menu {
+fn build_menu(mode: Arc<Mutex<String>>) -> Menu {
     let menu = Menu::new();
 
     let device_item = get_device_item();
-    let display_item = get_display_switch_item();
+    let display_item = get_display_switch_item(mode);
 
     menu.append(&device_item);
     menu.append(&display_item);
@@ -58,13 +58,32 @@ fn get_device_item() -> MenuItem {
     device_menu_item
 }
 
-fn get_display_switch_item() -> MenuItem {
+fn get_display_switch_item(mode: Arc<Mutex<String>>) -> MenuItem {
     let temperature_radio_button = RadioMenuItem::with_label("Temperature");
-    let usage_radio_button = RadioMenuItem::with_label("Usage");
+    let util_radio_button = RadioMenuItem::with_label("Util");
+    temperature_radio_button.join_group(Some(&temperature_radio_button));
+    util_radio_button.join_group(Some(&temperature_radio_button));
+
+    temperature_radio_button.connect_toggled(move |button| {
+        let group = button.group();
+
+        let active_radio = group.iter().find(|item| item.is_active()).unwrap();
+
+        match active_radio.label().unwrap().as_str() {
+            "Util" => {
+                let mut write_mode = mode.lock().unwrap();
+                *write_mode = "util".to_string();
+            }
+            _ => {
+                let mut write_mode = mode.lock().unwrap();
+                *write_mode = "temp".to_string();
+            }
+        }
+    });
 
     let display_switch_submenu = Menu::new();
     display_switch_submenu.append(&temperature_radio_button);
-    display_switch_submenu.append(&usage_radio_button);
+    display_switch_submenu.append(&util_radio_button);
 
     let display_switch_menu_item = MenuItem::with_label("Display Switch");
     display_switch_menu_item.set_submenu(Some(&display_switch_submenu));
