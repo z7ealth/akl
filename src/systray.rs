@@ -67,9 +67,11 @@ fn get_device_item() -> MenuItem {
 }
 
 fn get_display_switch_item(mode: Arc<Mutex<String>>) -> MenuItem {
-    let temperature_radio_button = RadioMenuItem::with_label("Temperature");
+    let temperature_radio_button = RadioMenuItem::with_label("Temperature C°");
+    let temperaturef_radio_button = RadioMenuItem::with_label("Temperature F°");
     let util_radio_button = RadioMenuItem::with_label("Util");
     temperature_radio_button.join_group(Some(&temperature_radio_button));
+    temperaturef_radio_button.join_group(Some(&temperature_radio_button));
     util_radio_button.join_group(Some(&temperature_radio_button));
 
     temperature_radio_button.connect_toggled(move |button| {
@@ -82,6 +84,10 @@ fn get_display_switch_item(mode: Arc<Mutex<String>>) -> MenuItem {
                 let mut write_mode = mode.lock().unwrap();
                 *write_mode = "util".to_string();
             }
+            "Temperature F°" => {
+                let mut write_mode = mode.lock().unwrap();
+                *write_mode = "temp_f".to_string();
+            }
             _ => {
                 let mut write_mode = mode.lock().unwrap();
                 *write_mode = "temp".to_string();
@@ -91,6 +97,7 @@ fn get_display_switch_item(mode: Arc<Mutex<String>>) -> MenuItem {
 
     let display_switch_submenu = Menu::new();
     display_switch_submenu.append(&temperature_radio_button);
+    display_switch_submenu.append(&temperaturef_radio_button);
     display_switch_submenu.append(&util_radio_button);
 
     let display_switch_menu_item = MenuItem::with_label("Display Switch");
@@ -117,7 +124,9 @@ fn get_about_item() -> MenuItem {
         window.set_default_width(400);
         window.set_default_height(200);
         window.set_copyright(Some(format!("{}  {}", "\u{F09B}", "z7ealth").as_str()));
-        window.set_comments(Some("Unofficial Linux version of DeepCool's AK Digital Software."));
+        window.set_comments(Some(
+            "Unofficial Linux version of DeepCool's AK Digital Software.",
+        ));
         window.set_resizable(false);
         window.set_window_position(WindowPosition::Center);
         window.set_title("About");

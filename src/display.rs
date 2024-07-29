@@ -1,4 +1,8 @@
-use std::{sync::{Arc, Mutex}, thread::sleep, time::Duration};
+use std::{
+    sync::{Arc, Mutex},
+    thread::sleep,
+    time::Duration,
+};
 
 use hidapi::HidApi;
 use sysinfo::{Components, System};
@@ -8,9 +12,8 @@ const PRODUCT_ID: u16 = 0x0003;
 const INTERVAL: u64 = 1;
 
 fn get_bar_value(value: f32) -> f32 {
-    
     if value < 10.0 {
-        return  0.0;
+        return 0.0;
     }
 
     value / 10.0
@@ -29,6 +32,7 @@ fn get_data(value: f32, mode: &str) -> Vec<u8> {
     match mode {
         "start" => base_data[1] = 170,
         "util" => base_data[1] = 76,
+        "temp_f" => base_data[1] = 35,
         _ => base_data[1] = 19, // CPU Temp mode
     }
 
@@ -82,6 +86,13 @@ fn get_temp() -> Vec<u8> {
     get_data(temp, "temp")
 }
 
+fn get_temp_f() -> Vec<u8> {
+    let temp = get_cpu_temperature();
+
+    let fahrenheit = temp * 9.0 / 5.0 + 32.0;
+    get_data(fahrenheit, "temp_f")
+}
+
 fn get_util() -> Vec<u8> {
     let util = get_cpu_utilization();
     get_data(util, "util")
@@ -107,6 +118,7 @@ pub fn start(mode: Arc<Mutex<String>>) {
 
                 match mode.lock().unwrap().as_str() {
                     "util" => ak.write(&get_util()).unwrap(),
+                    "temp_f" => ak.write(&get_temp_f()).unwrap(),
                     _ => ak.write(&get_temp()).unwrap(),
                 };
 
