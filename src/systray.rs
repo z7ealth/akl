@@ -117,7 +117,7 @@ fn get_about_item() -> MenuItem {
             .scale_simple(50, 50, InterpType::Bilinear)
             .unwrap();
 
-        window.set_icon_from_file(&icon_path.clone()).unwrap();
+        window.set_icon_from_file(icon_path.clone()).unwrap();
         window.set_logo(Some(&icon));
         window.set_program_name("AK Digital for Linux");
         window.set_version(Some(env!("CARGO_PKG_VERSION")));
