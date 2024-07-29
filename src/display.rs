@@ -19,6 +19,12 @@ fn get_bar_value(value: f32) -> f32 {
     value / 10.0
 }
 
+fn get_bar_value_f(value: f32) -> f32 {
+    let celcius = (value - 32.0) * 5.0 / 9.0;
+    
+    get_bar_value(celcius)
+}
+
 fn get_data(value: f32, mode: &str) -> Vec<u8> {
     let mut base_data = vec![0; 64];
 
@@ -29,14 +35,17 @@ fn get_data(value: f32, mode: &str) -> Vec<u8> {
 
     base_data[0] = 16; // ?
 
+    base_data[2] = get_bar_value(value) as u8;
+
     match mode {
         "start" => base_data[1] = 170,
         "util" => base_data[1] = 76,
-        "temp_f" => base_data[1] = 35,
+        "temp_f" => {
+            base_data[1] = 35;
+            base_data[2] = get_bar_value_f(value) as u8;
+        }
         _ => base_data[1] = 19, // CPU Temp mode
     }
-
-    base_data[2] = get_bar_value(value) as u8; // Bar
 
     if numbers.len() == 1 {
         base_data[5] = numbers[0].to_digit(10).unwrap() as u8;
