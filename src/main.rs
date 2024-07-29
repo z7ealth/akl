@@ -1,7 +1,6 @@
 use std::{
     sync::{Arc, Mutex},
-    thread,
-    time::Duration,
+    thread
 };
 
 mod display;
@@ -14,26 +13,15 @@ fn main() {
     let mode_display = Arc::clone(&mode);
 
     // Start the systray in a separate task
-    thread::spawn(|| {
+    let systray_handle = thread::spawn(|| {
         systray::start(mode_systray);
     });
 
     // Start the display in another task
-    thread::spawn(|| {
+    let display_hanlde = thread::spawn(|| {
         display::start(mode_display);
     });
 
-    // Keep the main function alive
-    loop {
-        thread::sleep(Duration::from_secs(1));
-
-        /*
-        let current_mode = *mode.lock().await;
-
-        *mode.lock().await = match current_mode {
-            "temp" => "util",
-            _ => "temp"
-        };
-        */
-    }
+    systray_handle.join().unwrap();
+    display_hanlde.join().unwrap();
 }

@@ -1,5 +1,10 @@
-use gtk::prelude::{CheckMenuItemExt, GtkMenuItemExt, MenuShellExt, RadioMenuItemExt, WidgetExt};
-use gtk::{Menu, MenuItem, RadioMenuItem};
+use gtk::gdk_pixbuf::{InterpType, Pixbuf};
+use gtk::glib::Propagation;
+use gtk::prelude::{
+    AboutDialogExt, CheckMenuItemExt, GtkMenuItemExt, GtkWindowExt, MenuShellExt, RadioMenuItemExt,
+    WidgetExt,
+};
+use gtk::{AboutDialog, Menu, MenuItem, RadioMenuItem, WindowPosition};
 use libappindicator::{AppIndicator, AppIndicatorStatus};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
@@ -17,6 +22,7 @@ pub fn start(mode: Arc<Mutex<String>>) {
                 let icon_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/images");
                 indicator.set_icon_theme_path(icon_path.to_str().unwrap());
                 indicator.set_icon_full("deepcool", "icon");
+                indicator.set_label("AKL", "");
 
                 let mut menu = build_menu(mode);
 
@@ -40,9 +46,11 @@ fn build_menu(mode: Arc<Mutex<String>>) -> Menu {
 
     let device_item = get_device_item();
     let display_item = get_display_switch_item(mode);
+    let about_item = get_about_item();
 
     menu.append(&device_item);
     menu.append(&display_item);
+    menu.append(&about_item);
 
     menu
 }
@@ -89,4 +97,41 @@ fn get_display_switch_item(mode: Arc<Mutex<String>>) -> MenuItem {
     display_switch_menu_item.set_submenu(Some(&display_switch_submenu));
 
     display_switch_menu_item
+}
+
+fn get_about_item() -> MenuItem {
+    let about = MenuItem::with_label("About");
+
+    about.connect_button_press_event(|_, _| {
+        let window = AboutDialog::new();
+        let icon_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/images/deepcool.png");
+        let icon = Pixbuf::from_file(icon_path.clone())
+            .unwrap()
+            .scale_simple(50, 50, InterpType::Bilinear)
+            .unwrap();
+
+        window.set_icon_from_file(&icon_path.clone()).unwrap();
+        window.set_logo(Some(&icon));
+        window.set_program_name("AK Digital for Linux");
+        window.set_version(Some(env!("CARGO_PKG_VERSION")));
+        window.set_default_width(400);
+        window.set_default_height(200);
+        window.set_copyright(Some(format!("{}  {}", "\u{F09B}", "z7ealth").as_str()));
+        window.set_comments(Some("Unofficial Linux version of DeepCool's AK Digital Software."));
+        window.set_resizable(false);
+        window.set_window_position(WindowPosition::Center);
+        window.set_title("About");
+
+        window.connect_button_release_event(|dialog, _| {
+            dialog.close();
+
+            Propagation::Proceed
+        });
+
+        window.show();
+
+        Propagation::Stop
+    });
+
+    about
 }
