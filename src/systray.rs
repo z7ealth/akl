@@ -1,8 +1,7 @@
 use gtk::gdk_pixbuf::{InterpType, Pixbuf};
 use gtk::glib::Propagation;
 use gtk::prelude::{
-    AboutDialogExt, CheckMenuItemExt, GtkMenuItemExt, GtkWindowExt, MenuShellExt, RadioMenuItemExt,
-    WidgetExt,
+    AboutDialogExt, CheckMenuItemExt, GtkMenuItemExt, GtkWindowExt, MenuShellExt, WidgetExt,
 };
 use gtk::{AboutDialog, Menu, MenuItem, RadioMenuItem, WindowPosition};
 use libappindicator::{AppIndicator, AppIndicatorStatus};
@@ -68,31 +67,30 @@ fn get_device_item() -> MenuItem {
 
 fn get_display_switch_item(mode: Arc<Mutex<String>>) -> MenuItem {
     let temperature_radio_button = RadioMenuItem::with_label("Temperature C°");
-    let temperaturef_radio_button = RadioMenuItem::with_label("Temperature F°");
-    let util_radio_button = RadioMenuItem::with_label("Util");
-    temperature_radio_button.join_group(Some(&temperature_radio_button));
-    temperaturef_radio_button.join_group(Some(&temperature_radio_button));
-    util_radio_button.join_group(Some(&temperature_radio_button));
+    let temperaturef_radio_button =
+        RadioMenuItem::with_label_from_widget(&temperature_radio_button, Some("Temperature F°"));
+    let util_radio_button =
+        RadioMenuItem::with_label_from_widget(&temperature_radio_button, Some("Util"));
 
-    temperature_radio_button.connect_toggled(move |button| {
-        let group = button.group();
+    let temp_mode = Arc::clone(&mode);
 
-        let active_radio = group.iter().find(|item| item.is_active()).unwrap();
+    temperature_radio_button.connect_toggled(move |_| {
+        let mut write_mode = temp_mode.lock().unwrap();
+        *write_mode = "temp".to_string();
+    });
 
-        match active_radio.label().unwrap().as_str() {
-            "Util" => {
-                let mut write_mode = mode.lock().unwrap();
-                *write_mode = "util".to_string();
-            }
-            "Temperature F°" => {
-                let mut write_mode = mode.lock().unwrap();
-                *write_mode = "temp_f".to_string();
-            }
-            _ => {
-                let mut write_mode = mode.lock().unwrap();
-                *write_mode = "temp".to_string();
-            }
-        }
+    let temp_f_mode = Arc::clone(&mode);
+
+    temperaturef_radio_button.connect_toggled(move |_| {
+        let mut write_mode = temp_f_mode.lock().unwrap();
+        *write_mode = "temp_f".to_string();
+    });
+
+    let util_mode = Arc::clone(&mode);
+
+    util_radio_button.connect_toggled(move |_| {
+        let mut write_mode = util_mode.lock().unwrap();
+        *write_mode = "util".to_string();
     });
 
     let display_switch_submenu = Menu::new();
