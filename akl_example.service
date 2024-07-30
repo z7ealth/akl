@@ -1,5 +1,5 @@
 [Unit]
-Description=DeepCool AK500 Digital linux driver service.
+Description=DeepCool AK Digital for Linux service.
 After=graphical.target
 
 [Service]
