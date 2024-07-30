@@ -27,15 +27,20 @@ This project aims to provide the same functionality as DeepCool's Windows versio
 
 #### Install
 
-1. `sudo cp akl_example.service /etc/systemd/system/akl.service`
+1. `sudo mkdir /etc/akl`
+2. `sudo cp config_example.toml /etc/akl/config.toml`
 
-2. Edit /etc/systemd/system/akl.service according to your system config.
+3. Edit /etc/akl/config.toml according to your system config.
 
-3. `sudo systemctl daemon-reload`
-4. `cargo build --release`
-5. `sudo cp ./target/release/akl /usr/bin/akl`
-6. `sudo systemctl enable akl.service`
-7. `sudo systemctl start akl.service`
+4. `sudo cp akl_example.service /etc/systemd/system/akl.service`
+
+5. Edit /etc/systemd/system/akl.service according to your system config.
+
+6. `sudo systemctl daemon-reload`
+7. `cargo build --release`
+8. `sudo cp ./target/release/akl /usr/bin/akl`
+9. `sudo systemctl enable akl.service`
+10. `sudo systemctl start akl.service`
 
 <hr>
 
