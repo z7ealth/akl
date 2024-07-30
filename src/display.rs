@@ -35,9 +35,9 @@ fn get_bar_value(value: f32) -> f32 {
 }
 
 fn get_bar_value_f(value: f32) -> f32 {
-    let celcius = (value - 32.0) * 5.0 / 9.0;
+    let celsius = (value - 32.0) * 5.0 / 9.0;
 
-    get_bar_value(celcius)
+    get_bar_value(celsius)
 }
 
 fn get_data(value: f32, mode: &str) -> Vec<u8> {
