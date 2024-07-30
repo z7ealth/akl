@@ -9,6 +9,8 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::{thread, time::Duration};
 
+use crate::config::get_config;
+
 pub fn start(mode: Arc<Mutex<String>>) {
     loop {
         match gtk::init() {
@@ -55,7 +57,10 @@ fn build_menu(mode: Arc<Mutex<String>>) -> Menu {
 }
 
 fn get_device_item() -> MenuItem {
-    let device_radio_button = RadioMenuItem::with_label("AK500 Digital");
+    let akl_config = get_config().unwrap();
+
+    let device_radio_button =
+        RadioMenuItem::with_label(format!("{} Digital", akl_config.product).as_str());
     let device_submenu = Menu::new();
     let device_menu_item = MenuItem::with_label("Device");
     device_radio_button.set_sensitive(false);
@@ -71,6 +76,12 @@ fn get_display_switch_item(mode: Arc<Mutex<String>>) -> MenuItem {
         RadioMenuItem::with_label_from_widget(&temperature_radio_button, Some("Temperature F°"));
     let util_radio_button =
         RadioMenuItem::with_label_from_widget(&temperature_radio_button, Some("Util"));
+
+    match mode.lock().unwrap().as_str() {
+        "util" => util_radio_button.set_active(true),
+        "temp_f" => temperaturef_radio_button.set_active(true),
+        _ => temperature_radio_button.set_active(true),
+    };
 
     let temp_mode = Arc::clone(&mode);
 

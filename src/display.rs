@@ -7,9 +7,24 @@ use std::{
 use hidapi::HidApi;
 use sysinfo::{Components, System};
 
+use crate::config::get_config;
+
 const VENDOR_ID: u16 = 0x3633;
-const PRODUCT_ID: u16 = 0x0003;
 const INTERVAL: u64 = 1;
+
+#[repr(u16)]
+enum Products {
+    AK500 = 0x0003,
+    AK620 = 0x0004,
+}
+
+#[repr(u8)]
+enum DisplayMode {
+    Celsius = 19,
+    Fahrenheit = 35,
+    Utilization = 76,
+    Start = 170,
+}
 
 fn get_bar_value(value: f32) -> f32 {
     if value < 10.0 {
@@ -21,7 +36,7 @@ fn get_bar_value(value: f32) -> f32 {
 
 fn get_bar_value_f(value: f32) -> f32 {
     let celcius = (value - 32.0) * 5.0 / 9.0;
-    
+
     get_bar_value(celcius)
 }
 
@@ -38,13 +53,13 @@ fn get_data(value: f32, mode: &str) -> Vec<u8> {
     base_data[2] = get_bar_value(value) as u8;
 
     match mode {
-        "start" => base_data[1] = 170,
-        "util" => base_data[1] = 76,
+        "start" => base_data[1] = DisplayMode::Start as u8,
+        "util" => base_data[1] = DisplayMode::Utilization as u8,
         "temp_f" => {
-            base_data[1] = 35;
+            base_data[1] = DisplayMode::Fahrenheit as u8;
             base_data[2] = get_bar_value_f(value) as u8;
         }
-        _ => base_data[1] = 19, // CPU Temp mode
+        _ => base_data[1] = DisplayMode::Celsius as u8,
     }
 
     if numbers.len() == 1 {
@@ -110,7 +125,16 @@ fn get_util() -> Vec<u8> {
 pub fn start(mode: Arc<Mutex<String>>) {
     match HidApi::new() {
         Ok(api) => {
-            let ak = api.open(VENDOR_ID, PRODUCT_ID).unwrap();
+            let akl_config = get_config().unwrap();
+
+            let product_id = match akl_config.product.as_str() {
+                "AK620" => Products::AK620 as u16,
+                _ => Products::AK500 as u16,
+            };
+
+            let ak = api
+                .open(VENDOR_ID, product_id)
+                .unwrap_or_else(|_| panic!("Unable to open device {}", akl_config.product));
 
             println!(
                 "Device found: {}",

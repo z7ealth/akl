@@ -3,11 +3,16 @@ use std::{
     thread
 };
 
+use config::get_config;
+
 mod display;
 mod systray;
+mod config;
 
 fn main() {
-    let mode: Arc<Mutex<String>> = Arc::new(Mutex::new("temp".to_string()));
+    let akl_config = get_config().unwrap();
+
+    let mode: Arc<Mutex<String>> = Arc::new(Mutex::new(akl_config.mode.to_string()));
 
     let mode_systray = Arc::clone(&mode);
     let mode_display = Arc::clone(&mode);

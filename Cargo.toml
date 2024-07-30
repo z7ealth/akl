@@ -9,3 +9,5 @@ sysinfo = "0.30.13"
 libappindicator = "0.9.0"
 image = "0.25.1"
 gtk = "0.18.1"
+toml = "0.8.17"
+serde = { version = "1.0.204", features = ["derive"] }
