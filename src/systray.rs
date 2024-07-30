@@ -139,6 +139,7 @@ fn get_about_item() -> MenuItem {
         window.set_resizable(false);
         window.set_window_position(WindowPosition::Center);
         window.set_title("About");
+        window.set_license_type(gtk::License::MitX11);
 
         window.connect_button_release_event(|dialog, _| {
             dialog.close();
