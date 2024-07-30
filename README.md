@@ -11,6 +11,11 @@ This project aims to provide the same functionality as DeepCool's Windows versio
 > [!NOTE]
 > As far as I know, this should work on any Linux distro.
 
+#### Supported CPU Coolers
+
+    DeepCool AK500 Digital
+    DeepCool AK620 Digital
+
 #### Requirements
 
  * libudev
