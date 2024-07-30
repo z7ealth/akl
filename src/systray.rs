@@ -17,7 +17,7 @@ pub fn start(mode: Arc<Mutex<String>>) {
             Ok(_) => {
                 println!("GTK Initialized");
 
-                let mut indicator = AppIndicator::new("libappindicator test application", "");
+                let mut indicator = AppIndicator::new("AK Digital for Linux", "");
                 indicator.set_status(AppIndicatorStatus::Active);
 
                 let icon_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/images");
