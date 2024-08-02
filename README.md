@@ -40,6 +40,12 @@ This project aims to provide the same functionality as DeepCool's Windows versio
 
 <hr>
 
+#### Troubleshooting
+
+AKL logs can be found at `/var/log/akl.log`
+
+<hr>
+
 #### Gallery
 
 <img src="./assets/images/akl_screenshot_1.png" alt="Systray icon" width="60%">
