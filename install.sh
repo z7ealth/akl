@@ -103,4 +103,4 @@ EOF
 sudo mv akl.service /etc/systemd/system
 sudo systemctl enable --now akl.service
 
-echo "Installation finished"
+echo -e "\nInstallation finished!"
