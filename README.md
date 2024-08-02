@@ -33,18 +33,10 @@ This project aims to provide the same functionality as DeepCool's Windows versio
 #### Install
 
 1. `git clone https://github.com/z7ealth/akl.git && cd akl`
-2. `sudo mkdir /etc/akl && sudo cp config_example.toml /etc/akl/config.toml`
 
-3. Edit /etc/akl/config.toml according to your needs.
+2. `chmod +x ./install.sh`
 
-4. `sudo cp akl_example.service /etc/systemd/system/akl.service`
-
-5. Edit /etc/systemd/system/akl.service and set the "DISPLAY" and "XAUTHORITY" environment variables. 
-
-6. `sudo systemctl daemon-reload`
-7. `cargo build --release`
-8. `sudo cp ./target/release/akl /usr/bin/akl`
-9. `sudo systemctl enable --now akl.service`
+3. `./install.sh`
 
 <hr>
 

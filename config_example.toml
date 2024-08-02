@@ -1,5 +1,6 @@
 # DeepCool CPU cooler's model (AK500 or AK620). Defaults to AK500.
-product = ""
+#product = "temp"
 
 # Default display mode (temp, temp_f or util). Defaults to "temp".
-mode = ""
+#mode = "temp"
+
