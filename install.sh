@@ -13,8 +13,6 @@ check_env_var() {
     exit 1
   else
     echo "Environment variable $var_name is set to: $var_value"
-    # Store the value in a file for later use
-    echo "$var_value" > "${var_name}_value.txt"
   fi
 }
 
