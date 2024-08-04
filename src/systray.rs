@@ -5,6 +5,7 @@ use gtk::prelude::{
 };
 use gtk::{AboutDialog, Menu, MenuItem, RadioMenuItem, WindowPosition};
 use libappindicator::{AppIndicator, AppIndicatorStatus};
+use std::{env, fs};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::{thread, time::Duration};
@@ -20,8 +21,12 @@ pub fn start(mode: Arc<Mutex<String>>) {
                 let mut indicator = AppIndicator::new("AK Digital for Linux", "");
                 indicator.set_status(AppIndicatorStatus::Active);
 
-                let icon_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/images");
-                indicator.set_icon_theme_path(icon_path.to_str().unwrap());
+                let icon_path = match fs::metadata("/etc/akl/deepcool.png") {
+                    Ok(_) => "/etc/akl".to_string(),
+                    Err(_) => format!("{}{}", env::current_dir().unwrap().to_str().unwrap(), "/assets/images"),
+                };
+
+                indicator.set_icon_theme_path(&icon_path);
                 indicator.set_icon_full("deepcool", "icon");
                 indicator.set_label("AKL", "");
 

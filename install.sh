@@ -23,7 +23,7 @@ done
 
 echo -e "All required environment variables are set.\n"
 
-echo -e "Script will prompt for sudo privileges in order to copy configuration files to /etc/akl and /etc/systemd/system\n"
+echo -e "Script will prompt for sudo privileges in order to copy files to /usr/bin /etc/akl and /etc/systemd/system\n"
 
 AKL_DIR="/etc/akl"
 
@@ -41,6 +41,12 @@ fi
 
 echo -e "Creating directory /etc/akl\n"
 sudo mkdir $AKL_DIR
+
+echo -e "Building executable in release mode...\n"
+cargo build --release
+echo -e "Moving akl executable to /usr/bin\n"
+sudo cp -rf ./target/release/akl /usr/bin
+sudo cp -rf ./assets/images/deepcool.png /etc/akl
 
 echo -e "Select your DeepCool CPU Cooler model:\n1. AK500 Digital\n2. AK620 Digital\n"
 
