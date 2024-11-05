@@ -73,6 +73,19 @@ EOF
 
 sudo mv $OUTPUT_CONFIG_FILE $AKL_DIR
 
+echo -e "Creating udev rules /etc/udev/rules.d/ak_digital.rules"
+
+OUTPUT_UDEV_FILE="ak_digital.rules"
+UDEV_RULES_DIR="/etc/udev/rules.d"
+
+cat <<EOF > "$OUTPUT_UDEV_FILE"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="3633", MODE="0666"
+SUBSYSTEM=="usb_device", ATTRS{idVendor}=="3633", MODE="0666"
+EOF
+
+sudo mv $OUTPUT_UDEV_FILE $UDEV_RULES_DIR
+sudo udevadm control --reload-rules
+
 echo -e "Copying service to /etc/systemd/system\n"
 
 if [ -f "/etc/systemd/system/akl.service" ]; then
@@ -93,7 +106,6 @@ After=graphical.target
 
 [Service]
 Type=simple
-User=root
 Restart=on-failure
 RestartSec=5s
 ExecStart=/usr/bin/akl

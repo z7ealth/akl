@@ -18,6 +18,7 @@ This project aims to provide the same functionality as DeepCool's Windows versio
 
 #### Requirements
 
+ * cargo
  * libudev
  * libayatana-appindicator
  * libxdo
