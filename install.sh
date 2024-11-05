@@ -75,6 +75,10 @@ sudo mv $OUTPUT_CONFIG_FILE $AKL_DIR
 
 echo -e "Creating udev rules /etc/udev/rules.d/ak_digital.rules"
 
+if [ -f "/etc/udev/rules.d/ak_digital.rules" ]; then
+  sudo rm "/etc/udev/rules.d/ak_digital.rules"
+fi
+
 OUTPUT_UDEV_FILE="ak_digital.rules"
 UDEV_RULES_DIR="/etc/udev/rules.d"
 
@@ -119,6 +123,8 @@ WantedBy=default.target
 EOF
 
 sudo mv akl.service /etc/systemd/system
+sudo chown root:root /etc/systemd/system/akl.service
+sudo systemctl daemon-reload
 sudo systemctl enable --now akl.service
 
 echo -e "\nInstallation finished!"
