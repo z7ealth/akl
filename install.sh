@@ -1,5 +1,11 @@
 #!/usr/bin/sh
 
+# Check if cargo is available
+if ! command -v cargo &> /dev/null; then
+    echo "Error: cargo command not found. Please install Rust and Cargo: https://www.rust-lang.org/es/learn/get-started"
+    exit 1
+fi
+
 # List of environment variables to check
 ENV_VARS=("XAUTHORITY" "DISPLAY")
 
