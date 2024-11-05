@@ -110,6 +110,7 @@ After=graphical.target
 
 [Service]
 Type=simple
+User=root
 Restart=on-failure
 RestartSec=5s
 ExecStart=/usr/bin/akl
