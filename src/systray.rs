@@ -5,9 +5,9 @@ use gtk::prelude::{
 };
 use gtk::{AboutDialog, Menu, MenuItem, RadioMenuItem, WindowPosition};
 use libappindicator::{AppIndicator, AppIndicatorStatus};
-use std::{env, fs};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
+use std::{env, fs};
 use std::{thread, time::Duration};
 
 use crate::config::get_config;
@@ -23,7 +23,11 @@ pub fn start(mode: Arc<Mutex<String>>) {
 
                 let icon_path = match fs::metadata("/etc/akl/deepcool.png") {
                     Ok(_) => "/etc/akl".to_string(),
-                    Err(_) => format!("{}{}", env::current_dir().unwrap().to_str().unwrap(), "/assets/images"),
+                    Err(_) => format!(
+                        "{}{}",
+                        env::current_dir().unwrap().to_str().unwrap(),
+                        "/assets/images"
+                    ),
                 };
 
                 indicator.set_icon_theme_path(&icon_path);
@@ -81,8 +85,11 @@ fn get_display_switch_item(mode: Arc<Mutex<String>>) -> MenuItem {
         RadioMenuItem::with_label_from_widget(&temperature_radio_button, Some("Temperature F°"));
     let util_radio_button =
         RadioMenuItem::with_label_from_widget(&temperature_radio_button, Some("Util"));
+    let auto_radio_button =
+        RadioMenuItem::with_label_from_widget(&temperature_radio_button, Some("Auto"));
 
     match mode.lock().unwrap().as_str() {
+        "auto" => auto_radio_button.set_active(true),
         "util" => util_radio_button.set_active(true),
         "temp_f" => temperaturef_radio_button.set_active(true),
         _ => temperature_radio_button.set_active(true),
@@ -109,10 +116,18 @@ fn get_display_switch_item(mode: Arc<Mutex<String>>) -> MenuItem {
         *write_mode = "util".to_string();
     });
 
+    let auto_mode = Arc::clone(&mode);
+
+    auto_radio_button.connect_toggled(move |_| {
+        let mut write_mode = auto_mode.lock().unwrap();
+        *write_mode = "auto".to_string();
+    });
+
     let display_switch_submenu = Menu::new();
     display_switch_submenu.append(&temperature_radio_button);
     display_switch_submenu.append(&temperaturef_radio_button);
     display_switch_submenu.append(&util_radio_button);
+    display_switch_submenu.append(&auto_radio_button);
 
     let display_switch_menu_item = MenuItem::with_label("Display Switch");
     display_switch_menu_item.set_submenu(Some(&display_switch_submenu));

@@ -153,6 +153,15 @@ pub fn start(mode: Arc<Mutex<String>>) {
                 ak.set_blocking_mode(false).unwrap();
 
                 match mode.lock().unwrap().as_str() {
+                    "auto" => {
+                        sleep(Duration::from_secs(3));
+
+                        ak.write(&get_util()).unwrap();
+
+                        sleep(Duration::from_secs(6));
+
+                        ak.write(&get_temp()).unwrap()
+                    }
                     "util" => ak.write(&get_util()).unwrap(),
                     "temp_f" => ak.write(&get_temp_f()).unwrap(),
                     _ => ak.write(&get_temp()).unwrap(),

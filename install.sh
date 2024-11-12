@@ -73,7 +73,7 @@ cat <<EOF > "$OUTPUT_CONFIG_FILE"
 # DeepCool CPU cooler's model (AK500 or AK620). Defaults to "AK500".
 product = "$PRODUCT"
 
-# Default display mode (temp, temp_f or util). Defaults to "temp".
+# Default display mode (temp, temp_f, util or auto). Defaults to "temp".
 mode = "temp"
 EOF
 
