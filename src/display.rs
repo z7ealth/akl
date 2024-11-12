@@ -99,7 +99,10 @@ fn get_cpu_temperature() -> f32 {
 fn get_cpu_utilization() -> f32 {
     let mut system = System::new_all();
 
-    // First we need to update all information of our system struct.
+    system.refresh_cpu();
+
+    sleep(Duration::from_millis(600));
+
     system.refresh_cpu();
 
     system.global_cpu_info().cpu_usage()
