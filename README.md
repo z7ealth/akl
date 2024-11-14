@@ -30,7 +30,7 @@ This project aims to provide the same functionality as DeepCool's Windows versio
 
 #### Manjaro
 
-`sudo pacman -y install base-devel libappindicator-gtk3`
+`sudo pacman -Syu base-devel libappindicator-gtk3`
 
 > For any other distro, search for the package names and use the native package manager (e.g., apt, pacman, zypper) to install them.
 
