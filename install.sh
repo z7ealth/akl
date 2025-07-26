@@ -52,7 +52,7 @@ echo -e "Building executable in release mode...\n"
 cargo build --release
 echo -e "Moving akl executable to /usr/bin\n"
 sudo cp -rf ./target/release/akl /usr/bin
-sudo cp -rf ./assets/images/deepcool.png /etc/akl
+sudo cp -rf ./assets/images/akl_logo.png /etc/akl
 
 echo -e "Select your DeepCool CPU Cooler model:\n1. AK500 Digital\n2. AK620 Digital\n"
 

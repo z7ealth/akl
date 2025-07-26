@@ -21,7 +21,7 @@ pub fn start(mode: Arc<Mutex<String>>) {
                 let mut indicator = AppIndicator::new("AK Digital for Linux", "");
                 indicator.set_status(AppIndicatorStatus::Active);
 
-                let icon_path = match fs::metadata("/etc/akl/deepcool.png") {
+                let icon_path = match fs::metadata("/etc/akl/akl_logo.png") {
                     Ok(_) => "/etc/akl".to_string(),
                     Err(_) => format!(
                         "{}{}",
@@ -140,7 +140,7 @@ fn get_about_item() -> MenuItem {
 
     about.connect_button_press_event(|_, _| {
         let window = AboutDialog::new();
-        let icon_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/images/deepcool.png");
+        let icon_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/images/akl_logo.png");
         let icon = Pixbuf::from_file(icon_path.clone())
             .unwrap()
             .scale_simple(50, 50, InterpType::Bilinear)
