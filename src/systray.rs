@@ -31,7 +31,7 @@ pub fn start(mode: Arc<Mutex<String>>) {
                 };
 
                 indicator.set_icon_theme_path(&icon_path);
-                indicator.set_icon_full("deepcool", "icon");
+                indicator.set_icon_full("akl_logo", "icon");
                 indicator.set_label("AKL", "");
 
                 let mut menu = build_menu(mode);
