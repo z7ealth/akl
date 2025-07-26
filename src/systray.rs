@@ -143,7 +143,7 @@ fn get_about_item() -> MenuItem {
         let icon_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/images/akl_logo.png");
         let icon = Pixbuf::from_file(icon_path.clone())
             .unwrap()
-            .scale_simple(50, 50, InterpType::Bilinear)
+            .scale_simple(80, 80, InterpType::Bilinear)
             .unwrap();
 
         window.set_icon_from_file(icon_path.clone()).unwrap();
