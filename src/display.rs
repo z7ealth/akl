@@ -89,7 +89,7 @@ fn get_cpu_temperature() -> f32 {
     for component in components.list() {
         if component.label().contains(amd_cpu_label) || component.label().contains(intel_cpu_label)
         {
-            cpu_temp = component.temperature()
+            cpu_temp = component.temperature().expect("unable to get cpu temperature")
         }
     }
 
@@ -99,13 +99,13 @@ fn get_cpu_temperature() -> f32 {
 fn get_cpu_utilization() -> f32 {
     let mut system = System::new_all();
 
-    system.refresh_cpu();
+    system.refresh_cpu_all();
 
     sleep(Duration::from_millis(600));
 
-    system.refresh_cpu();
+    system.refresh_cpu_all();
 
-    system.global_cpu_info().cpu_usage()
+    system.global_cpu_usage()
 }
 
 fn get_temp() -> Vec<u8> {
@@ -171,7 +171,7 @@ pub fn start(mode: Arc<Mutex<String>>) {
             }
         }
         Err(e) => {
-            eprintln!("Error: {}", e);
+            eprintln!("Error: {e}");
         }
     }
 }
