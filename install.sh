@@ -1,120 +1,114 @@
-#!/usr/bin/sh
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Check if cargo is available
-if ! command -v cargo &> /dev/null; then
-    echo "Error: cargo command not found. Please install Rust and Cargo: https://www.rust-lang.org/es/learn/get-started"
-    exit 1
-fi
+APP_NAME="akl"
+AKL_DIR="$HOME/.config/akl"
+SERVICE_NAME="akl"
+SERVICE_FILE="${SERVICE_NAME}.service"
+SERVICE_DIR="$HOME/.config/systemd/user"
+EXEC_PATH="$HOME/.config/akl/bin/akl"
 
-# List of environment variables to check
-ENV_VARS=("XAUTHORITY" "DISPLAY")
-
-# Function to check if an environment variable is set
-check_env_var() {
-  local var_name=$1
-  local var_value=$(printenv "$var_name")
-
-  if [ -z "$var_value" ]; then
-    echo "Environment variable $var_name is not set."
-    exit 1
-  else
-    echo "Environment variable $var_name is set to: $var_value"
-  fi
+log() {
+  echo "[+] $1"
 }
 
-# Iterate over the list of environment variables and check each one
-for var in "${ENV_VARS[@]}"; do
-  check_env_var "$var"
-done
+command -v cargo >/dev/null 2>&1 || {
+  echo "Error: cargo command not found. Please install Rust and Cargo."
+  exit 1
+}
 
-echo -e "All required environment variables are set.\n"
+log "Building executable in release mode..."
+cargo build --release
 
-echo -e "Script will prompt for sudo privileges in order to copy files to /usr/bin /etc/akl and /etc/systemd/system\n"
-
-AKL_DIR="/etc/akl"
-
-# Check if the directory exists
 if [ -d "$AKL_DIR" ]; then
-  # Directory is not empty
-  echo -e "The directory $AKL_DIR is not empty. Existing configuration will be lost.\n"
-  read -p "Do you want to proceed? (y/n):" choice
-  case "$choice" in 
-    y|Y ) echo -e "Deleting current configuration\n"; sudo rm -rf $AKL_DIR;;
-    n|N ) echo "Exiting."; exit 1;;
-    * ) echo "Invalid choice. Exiting."; exit 1;;
+  echo -e "The directory $AKL_DIR already exists. Existing configuration will be lost.\n"
+  read -r -p "Do you want to proceed? (y/n): " choice
+  case "$choice" in
+    y|Y) rm -rf "$AKL_DIR" ;;
+    n|N) echo "Exiting."; exit 1 ;;
+    *) echo "Invalid choice. Exiting."; exit 1 ;;
   esac
 fi
 
-echo -e "Creating directory /etc/akl\n"
-sudo mkdir $AKL_DIR
+log "Creating app directory..."
+mkdir -p "$AKL_DIR/bin"
+mkdir -p "$AKL_DIR/assets/images"
 
-echo -e "Building executable in release mode...\n"
-cargo build --release
-echo -e "Moving akl executable to /usr/bin\n"
-sudo cp -rf ./target/release/akl /usr/bin
-sudo cp -rf ./assets/images/akl_logo.png /etc/akl
+log "Installing executable and assets..."
+cp -f ./target/release/akl "$EXEC_PATH"
+cp -f ./assets/images/akl_logo.png "$AKL_DIR/assets/images/akl_logo.png"
 
 echo -e "Select your DeepCool CPU Cooler model:\n1. AK500 Digital\n2. AK620 Digital\n"
+read -r -p "Pick a number: " model_choice
 
-read -p "Pick a number: " model_choice
-case "$model_choice" in 
-  1 ) PRODUCT="AK500";;
-  2 ) PRODUCT="AK620";;
-  * ) echo "Invalid choice. Exiting."; exit 1;;
+case "$model_choice" in
+  1) PRODUCT="AK500" ;;
+  2) PRODUCT="AK620" ;;
+  *) echo "Invalid choice. Exiting."; exit 1 ;;
 esac
 
-echo -e "Creating configuration file $AKL_DIR/config.toml\n"
-
-OUTPUT_CONFIG_FILE="config.toml"
-
-cat <<EOF > "$OUTPUT_CONFIG_FILE"
+log "Creating config..."
+cat > "$AKL_DIR/config.toml" <<EOF
 # AKL Configuration File
 
-# DeepCool CPU cooler's model (AK500 or AK620). Defaults to "AK500".
 product = "$PRODUCT"
-
-# Default display mode (temp, temp_f, util or auto). Defaults to "temp".
 mode = "temp"
 EOF
 
-sudo mv $OUTPUT_CONFIG_FILE $AKL_DIR
+log "Creating user systemd service..."
 
-echo -e "Copying service to /etc/systemd/system\n"
+mkdir -p "$SERVICE_DIR"
 
-if [ -f "/etc/systemd/system/akl.service" ]; then
-  sudo systemctl disable akl.service
-  sudo systemctl stop akl.service
-  echo "Deleting previous service file..."
-  sudo rm "/etc/systemd/system/akl.service"
-  echo "File akl.service has been deleted."
-  sudo systemctl daemon-reload
+if [ -f "$SERVICE_DIR/$SERVICE_FILE" ]; then
+  systemctl --user disable "$SERVICE_NAME" || true
+  systemctl --user stop "$SERVICE_NAME" || true
+  rm -f "$SERVICE_DIR/$SERVICE_FILE"
 fi
 
-OUTPUT_SERVICE_FILE="akl.service"
-
-cat <<EOF > "$OUTPUT_SERVICE_FILE"
+cat > "$SERVICE_DIR/$SERVICE_FILE" <<EOF
 [Unit]
-Description=DeepCool AK Digital for Linux service.
-After=graphical.target
+Description=AK Digital for Linux
+After=graphical-session.target
+PartOf=graphical-session.target
 
 [Service]
 Type=simple
-User=root
+ExecStartPre=/bin/sh -c 'systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS XDG_CURRENT_DESKTOP || true'
+ExecStart=$EXEC_PATH
 Restart=on-failure
 RestartSec=5s
-ExecStart=/usr/bin/akl
-StandardOutput=append:/var/log/akl.log
-StandardError=append:/var/log/akl.log
-Environment=DISPLAY=$DISPLAY
-Environment=XAUTHORITY=$XAUTHORITY
+
+Environment=AKL_CONFIG_DIR=$AKL_DIR
+Environment=GTK_USE_PORTAL=1
+
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=default.target
 EOF
 
-sudo mv akl.service /etc/systemd/system
-sudo chown root:root /etc/systemd/system/akl.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now akl.service
+systemctl --user daemon-reexec
+systemctl --user daemon-reload
+systemctl --user enable --now "$SERVICE_NAME"
+
+log "Installing XDG autostart fallback..."
+
+mkdir -p "$HOME/.config/autostart"
+
+cat > "$HOME/.config/autostart/akl.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=AK Digital for Linux
+Comment=DeepCool AK Digital tray icon
+Exec=$EXEC_PATH
+Terminal=false
+X-GNOME-Autostart-enabled=true
+EOF
 
 echo -e "\nInstallation finished!"
+echo ""
+echo "If using Hyprland, add this to ~/.config/hypr/hyprland.conf:"
+echo ""
+echo "exec-once = systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS XDG_CURRENT_DESKTOP"
+echo "exec-once = systemctl --user restart akl.service"

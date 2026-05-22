@@ -21,12 +21,23 @@ pub fn start(mode: Arc<Mutex<String>>) {
                 let mut indicator = AppIndicator::new("AK Digital for Linux", "");
                 indicator.set_status(AppIndicatorStatus::Active);
 
-                let icon_path = match fs::metadata("/etc/akl/akl_logo.png") {
-                    Ok(_) => "/etc/akl".to_string(),
+                let icon_path = match env::var("HOME") {
+                    Ok(home) => {
+                        let user_icon_dir = format!("{}/.config/akl/assets/images", home);
+                        let user_icon_file = format!("{}/akl_logo.png", user_icon_dir);
+
+                        if fs::metadata(&user_icon_file).is_ok() {
+                            user_icon_dir
+                        } else {
+                            format!(
+                                "{}/assets/images",
+                                env::current_dir().unwrap().to_str().unwrap()
+                            )
+                        }
+                    }
                     Err(_) => format!(
-                        "{}{}",
-                        env::current_dir().unwrap().to_str().unwrap(),
-                        "/assets/images"
+                        "{}/assets/images",
+                        env::current_dir().unwrap().to_str().unwrap()
                     ),
                 };
 
